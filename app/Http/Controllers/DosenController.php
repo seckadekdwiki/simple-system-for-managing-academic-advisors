@@ -4,28 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Dosen;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class DosenController extends Controller
 {
-    protected function flushCache(): void
-    {
-        Cache::forget('dosens.index');
-        Cache::forget('mahasiswas.index');
-    }
 
     public function index()
     {
-        $dosens = Cache::remember('dosens.index', now()->addMinutes(30), function () {
-            return Dosen::orderBy('nama')->get();
-        });
+        $dosens = Dosen::orderBy('nama')->get();
 
         return view('dosens.index', compact('dosens'));
     }
 
     public function create()
     {
-        return view('dosens.create');
+        return view('dosens.form');
     }
 
     public function store(Request $request)
@@ -37,14 +29,13 @@ class DosenController extends Controller
         ]);
 
         Dosen::create($validated);
-        $this->flushCache();
 
         return redirect()->route('dosens.index')->with('success', 'Dosen berhasil ditambahkan.');
     }
 
     public function edit(Dosen $dosen)
     {
-        return view('dosens.edit', compact('dosen'));
+        return view('dosens.form', compact('dosen'));
     }
 
     public function update(Request $request, Dosen $dosen)
@@ -56,7 +47,6 @@ class DosenController extends Controller
         ]);
 
         $dosen->update($validated);
-        $this->flushCache();
 
         return redirect()->route('dosens.index')->with('success', 'Data dosen berhasil diperbarui.');
     }
@@ -64,7 +54,6 @@ class DosenController extends Controller
     public function destroy(Dosen $dosen)
     {
         $dosen->delete();
-        $this->flushCache();
 
         return redirect()->route('dosens.index')->with('success', 'Dosen berhasil dihapus.');
     }

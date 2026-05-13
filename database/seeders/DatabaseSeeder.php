@@ -100,3 +100,4 @@ class DatabaseSeeder extends Seeder
             Mahasiswa::create($mahasiswa);
         }
     }
+}

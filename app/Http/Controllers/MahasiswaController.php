@@ -5,30 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class MahasiswaController extends Controller
 {
-    protected function flushCache(): void
-    {
-        Cache::forget('mahasiswas.index');
-        Cache::forget('dosens.index');
-    }
 
     public function index()
     {
-        $mahasiswas = Cache::remember('mahasiswas.index', now()->addMinutes(30), function () {
-            return Mahasiswa::with('dosen')->orderBy('nama')->get();
-        });
+        $mahasiswas = Mahasiswa::with('dosen')->orderBy('nama')->get();
 
         return view('mahasiswas.index', compact('mahasiswas'));
     }
 
     public function create()
     {
-        $dosens = Cache::remember('dosens.index', now()->addMinutes(30), function () {
-            return Dosen::orderBy('nama')->get();
-        });
+        $dosens = Dosen::orderBy('nama')->get();
 
         return view('mahasiswas.form', compact('dosens'));
     }
@@ -43,16 +33,13 @@ class MahasiswaController extends Controller
         ]);
 
         Mahasiswa::create($validated);
-        $this->flushCache();
 
         return redirect()->route('mahasiswas.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
     }
 
     public function edit(Mahasiswa $mahasiswa)
     {
-        $dosens = Cache::remember('dosens.index', now()->addMinutes(30), function () {
-            return Dosen::orderBy('nama')->get();
-        });
+        $dosens = Dosen::orderBy('nama')->get();
 
         return view('mahasiswas.form', compact('mahasiswa', 'dosens'));
     }
@@ -67,7 +54,6 @@ class MahasiswaController extends Controller
         ]);
 
         $mahasiswa->update($validated);
-        $this->flushCache();
 
         return redirect()->route('mahasiswas.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
     }
@@ -75,7 +61,6 @@ class MahasiswaController extends Controller
     public function destroy(Mahasiswa $mahasiswa)
     {
         $mahasiswa->delete();
-        $this->flushCache();
 
         return redirect()->route('mahasiswas.index')->with('success', 'Mahasiswa berhasil dihapus.');
     }
